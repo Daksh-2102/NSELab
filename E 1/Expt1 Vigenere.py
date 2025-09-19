@@ -4,36 +4,57 @@ Created on Fri Sep 12 10:15:26 2025
 
 @author: navee
 """
+class VigenereCipher:
+    def __init__(self, key: str):
+        # Always keep key in uppercase for consistency
+        self.key = key.upper()
 
-def vigenere_encrypt(text, key):
-    result = ""
-    key_length = len(key)
-    key_int = [ord(i.lower()) - ord('a') for i in key]
-    for i, char in enumerate(text):
-        if char.isalpha():
-            base = ord('A') if char.isupper() else ord('a')
-            offset = key_int[i % key_length]
-            result += chr((ord(char) - base + offset) % 26 + base)
-        else:
-            result += char
-    return result
+    def __shift_char(self, char: str, key_index: int, encrypt: bool = True) -> str:
+        """Helper method to shift a character during encryption/decryption."""
+        if not char.isalpha():
+            return char  # Leave non-alphabet characters unchanged
 
-def vigenere_decrypt(ciphertext, key):
-    result = ""
-    key_length = len(key)
-    key_int = [ord(i.lower()) - ord('a') for i in key]
-    for i, char in enumerate(ciphertext):
-        if char.isalpha():
-            base = ord('A') if char.isupper() else ord('a')
-            offset = key_int[i % key_length]
-            result += chr((ord(char) - base - offset) % 26 + base)
-        else:
-            result += char
-    return result
+        base = 'A' if char.isupper() else 'a'
+        shift = ord(self.key[key_index % len(self.key)]) - ord('A')
+
+        if not encrypt:
+            shift = -shift  # Reverse shift for decryption
+
+        return chr((ord(char) - ord(base) + shift) % 26 + ord(base))
+
+    def encrypt(self, plaintext: str) -> str:
+        result = []
+        key_index = 0
+        for char in plaintext:
+            if char.isalpha():
+                result.append(self.__shift_char(char, key_index, encrypt=True))
+                key_index += 1
+            else:
+                result.append(char)
+        return ''.join(result)
+
+    def decrypt(self, ciphertext: str) -> str:
+        result = []
+        key_index = 0
+        for char in ciphertext:
+            if char.isalpha():
+                result.append(self.__shift_char(char, key_index, encrypt=False))
+                key_index += 1
+            else:
+                result.append(char)
+        return ''.join(result)
+
 
 # Example usage
-plaintext = "Network Security"
-key = "key"
-ciphertext = vigenere_encrypt(plaintext, key)
-print("Encrypted:", ciphertext)
-print("Decrypted:", vigenere_decrypt(ciphertext, key))
+if __name__ == "__main__":
+    text = "HELLO WORLD"
+    key = "KEY"
+
+    cipher = VigenereCipher(key)
+
+    encrypted = cipher.encrypt(text)
+    decrypted = cipher.decrypt(encrypted)
+
+    print("Original :", text)
+    print("Encrypted:", encrypted)
+    print("Decrypted:", decrypted)
