@@ -4,23 +4,26 @@ Created on Fri Sep 12 10:14:44 2025
 
 @author: navee
 """
-
 def caesar_encrypt(text, shift):
     result = ""
     for char in text:
-        if char.isalpha():
-            base = ord('A') if char.isupper() else ord('a')
-            result += chr((ord(char) - base + shift) % 26 + base)
+        if char.isalpha():  # only letters
+            base = 'A' if char.isupper() else 'a'
+            result += chr((ord(char) - ord(base) + shift) % 26 + ord(base))
         else:
-            result += char
+            result += char  # keep spaces/punctuation same
     return result
 
-def caesar_decrypt(ciphertext, shift):
-    return caesar_encrypt(ciphertext, -shift)
+def caesar_decrypt(cipher, shift):
+    return caesar_encrypt(cipher, -shift)
 
-# Example usage
-plaintext = "Hello Network Security"
+# input
+text = "HELLO WORLD"
 shift = 3
-ciphertext = caesar_encrypt(plaintext, shift)
-print("Encrypted:", ciphertext)
-print("Decrypted:", caesar_decrypt(ciphertext, shift))
+encrypted = caesar_encrypt(text, shift)
+decrypted = caesar_decrypt(encrypted, shift)
+
+print("Original:", text)
+print("Encrypted:", encrypted)
+print("Decrypted:", decrypted)
+
