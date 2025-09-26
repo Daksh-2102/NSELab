@@ -9,46 +9,49 @@ import hashlib
 import time
 import random
 
-shared_secret = "network_secret_key"
+# Pre-shared secret (server-side)
+SECRET_KEY = "Dakshsecret"
 
-def generate_nonce():
-    return str(random.randint(100000, 999999))
+# Server generates random challenge with timestamp
+def generate_challenge():
+    challenge = str(random.randint(10000, 99999))
+    timestamp = int(time.time())  # current time in seconds
+    return challenge, timestamp
 
-def hash_response(nonce, secret):
-    return hashlib.sha256((nonce + secret).encode()).hexdigest()
+# Client computes response
+def compute_response(challenge, secret):
+    data = challenge + secret
+    return hashlib.sha256(data.encode()).hexdigest()
 
-# Server side: generate nonce
-nonce = generate_nonce()
-print("Server sends nonce to client:", nonce)
+# Server verifies response and detects replay
+used_nonces = set()
 
-# Client side: compute response hash
-client_response = hash_response(nonce, shared_secret)
-print("Client sends encrypted response:", client_response)
+def verify_response(challenge, response, timestamp):
+    if challenge in used_nonces:
+        return f"Replay Attack Detected! (Challenge issued at {timestamp})"
+    expected = compute_response(challenge, SECRET_KEY)
+    if response == expected:
+        used_nonces.add(challenge)
+        return f"Authentication Successful (Challenge issued at {timestamp})"
+    return "Authentication Failed"
 
-# Server side: verify response
-expected_response = hash_response(nonce, shared_secret)
+# --- Simulation with User Input ---
+challenge, ts = generate_challenge()
+print(f"\nServer Challenge: {challenge} (Issued at: {time.ctime(ts)})")
 
-if client_response == expected_response:
-    print("Authentication Successful")
-else:
-    print("Authentication Failed")
+# Client enters secret key
+user_secret = input("Enter your secret key: ")
 
-# To handle replay attack: include timestamp
+# Client computes response
+response = compute_response(challenge, user_secret)
+print("Client Response:", response)
 
-timestamp = str(int(time.time()))
-nonce_with_time = nonce + timestamp
-response_with_time = hashlib.sha256((nonce_with_time + shared_secret).encode()).hexdigest()
-print("Client sends encrypted response with timestamp:", response_with_time)
+# Server verifies
+print("Server Verification:", verify_response(challenge, response, ts))
 
-# Server verifies timestamp freshness (e.g., within 5 seconds)
-current_time = int(time.time())
-received_time = int(timestamp)
+# Simulate replay attack with delay
+print("\n--- Replay Attack Simulation ---")
+time.sleep(3)  # attacker tries replay after 3 seconds
+print(f"Replay Attempt at {time.ctime()} ->", verify_response(challenge, response, ts))
 
-if abs(current_time - received_time) <= 5:
-    expected_response_time = hashlib.sha256((nonce + timestamp + shared_secret).encode()).hexdigest()
-    if response_with_time == expected_response_time:
-        print("Authentication Successful with replay protection")
-    else:
-        print("Authentication Failed")
-else:
-    print("Replay attack detected - timestamp expired")
+
