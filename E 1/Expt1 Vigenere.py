@@ -35,6 +35,7 @@ class VigenereCipher:
 
 # Example usage
 if __name__ == "__main__":
+    
     cipher = VigenereCipher("key")
     plaintext = "Network Security"
 
