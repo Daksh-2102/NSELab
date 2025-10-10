@@ -43,9 +43,9 @@ if __name__ == "__main__":
     print(f"Tampered Hash : {hash2}")
 
     if checker.verify_integrity(text1, text2):
-        print("\n✅ Data integrity verified (no tampering).")
+        print("\n Data integrity verified (no tampering).")
     else:
-        print("\n❌ Data has been tampered (hashes differ).")
+        print("\n Data has been tampered (hashes differ).")
 import hashlib
 def sha256_text(data:str) -> str:
     return hashlib.sha256(data.encode()).hexdigest()
@@ -65,4 +65,5 @@ if hash1 == hash2:
     print("\nData integrity verified i.e no tampering.")
 else:
     print("\nData has been tampered i.e hashes differ.")
+
 
