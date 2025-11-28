@@ -1,0 +1,74 @@
+# SSH Experiment 6 — Secure Shell Access (ReadMe)
+
+This repository contains the files, commands, and documentation for **SSH Experiment 6**, commonly performed in networking or cybersecurity labs to understand secure remote login, key-based authentication, and basic SSH configurations.
+
+## 📌 Objectives
+
+* Understand how SSH works for secure remote access
+* Configure SSH on a Linux machine
+* Generate SSH key pairs
+* Perform password-based and key-based authentication
+* Modify SSH server configurations
+* Test secure connectivity between two systems
+
+## 🖥️ Requirements
+
+* Two Linux systems (VM/physical)
+* OpenSSH client & server installed
+* Basic understanding of Linux commands
+
+---
+
+## 🛠️ Steps Performed
+
+### **1. Check SSH Installation**
+
+```bash
+sudo systemctl status ssh
+```
+
+If not installed:
+
+```bash
+sudo apt install openssh-server
+```
+
+### **2. Start & Enable SSH Service**
+
+```bash
+sudo systemctl start ssh
+sudo systemctl enable ssh
+```
+
+### **3. Find IP Address**
+
+```bash
+ip a
+```
+
+### **4. Connect to Remote Machine via SSH**
+
+```bash
+ssh username@<remote-ip>
+```
+
+### **5. Generate SSH Key Pair**
+
+```bash
+ssh-keygen -t rsa -b 4096
+```
+
+Default location:
+
+```
+~/.ssh/id_rsa
+~/.ssh/id_rsa.pub
+```
+
+### **6. Copy Public Key to Remote Machine**
+
+```bash
+ssh-copy-id username@<remote-ip>
+```
+
+### **7. Disable Password Authentication (Optional – Hardening)**
