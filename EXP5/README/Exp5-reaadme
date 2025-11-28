@@ -1,21 +1,110 @@
-********///////*********
+# Wireshark Experiment — TLS Packet Capture & Analysis
 
-Tools and Techniques 
-1. Wireshark 
-2. TLS protocol
-3. packet capturing filtering
+This repository documents an experiment involving **Wireshark**, **TLS protocol analysis**, and **packet capturing/filtering**.
+The goal of this lab is to observe how TLS secures HTTPS communication by encrypting data exchanged between a client and a server.
 
-*********//////////************
+---
 
-Methodology used 
-1. set environment
-2. install wireshark
-3. start capturing packets
-4. open wireshark and select active networks imterface
-5. apply open and visit https website like google.
-6. Wireshark captures all packets exchanged
+## 🧰 Tools and Techniques Used
 
-Analysis and conclusion
+1. **Wireshark** – Packet capturing and analysis tool
+2. **TLS Protocol** – Secure protocol used in HTTPS communication
+3. **Packet Capturing & Filtering** – Capturing traffic and applying filters such as `tls`, `tcp`, `ip.addr == <target-ip>` etc.
 
+---
 
-**********END********************************************************
+## 🛠️ Methodology Used
+
+### **1. Set Environment**
+
+Prepared a system with internet access and administrative permissions to allow packet capture.
+
+### **2. Install Wireshark**
+
+Installed Wireshark using package manager:
+
+```bash
+sudo apt install wireshark
+```
+
+### **3. Start Capturing Packets**
+
+Launched Wireshark and allowed necessary permissions for full packet capture.
+
+### **4. Open Wireshark and Select Active Network Interface**
+
+Selected the correct network interface (e.g., `eth0`, `wlan0`) that carries internet traffic.
+
+### **5. Visit an HTTPS Website**
+
+Opened a browser and visited a secure website (e.g., **[https://google.com](https://google.com)**) to generate TLS traffic.
+
+### **6. Wireshark Captures All Packets**
+
+Wireshark captured:
+
+* TCP handshake
+* TLS ClientHello & ServerHello
+* Certificate exchange
+* Encrypted payload packets
+
+---
+
+## 🔍 Analysis
+
+### **1. Viewing TLS Handshake**
+
+Using the filter:
+
+```
+tls
+```
+
+We can observe:
+
+* **ClientHello**: Supported TLS versions, cipher suites
+* **ServerHello**: Chosen TLS version and cipher suite
+* **Certificate**: Server identity validation
+* **Key Exchange Messages**: Used for generating session keys
+
+### **2. Encrypted Application Data**
+
+After the handshake:
+
+* All packets labeled **“Application Data”** are encrypted
+* No actual content (credentials, queries) is visible
+* Confirms confidentiality provided by TLS
+
+### **3. TCP Layer Analysis**
+
+Before TLS starts, the usual 3-way handshake occurs:
+
+* SYN
+* SYN/ACK
+* ACK
+
+Useful filters:
+
+```
+tcp
+tcp.port == 443
+ip.addr == <website-ip>
+```
+
+### **4. Security Observation**
+
+Although packet metadata (IP, ports, sizes, timings) is visible, **actual content is encrypted**, proving that HTTPS/TLS protects user data from eavesdropping.
+
+---
+
+## 📝 Conclusion
+
+This experiment demonstrates how **Wireshark** can be used to observe TLS-secured HTTPS communication.
+Key findings:
+
+* TLS handshake packets (ClientHello, ServerHello, certificates) are visible.
+* After handshake completion, all application data becomes **encrypted**, ensuring confidentiality.
+* Packet capturing tools can show metadata but **cannot decrypt HTTPS traffic** without session keys.
+* This validates the effectiveness of TLS in protecting sensitive information during transmission.
+
+This experiment is essential in cybersecurity education as it helps visualize how
