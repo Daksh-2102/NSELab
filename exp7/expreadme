@@ -1,10 +1,146 @@
-**********/////////////////************
+# Wireshark & Aircrack-ng Experiment — Wireless Packet Capture & Analysis
 
-Tools and techniques
-1. Wireshark and npcap
-2. aircrack-ng 
+This repository documents a cybersecurity experiment performed using **Wireshark**, **Npcap**, and **Aircrack-ng** to capture, analyze, and understand wireless network traffic.
+The goal is to observe packet flow, monitor Wi-Fi frames, and understand how wireless security mechanisms work at a low level.
 
-Methodology
+---
 
+## 🧰 Tools and Techniques Used
 
-Analysis and conclusion
+### **1. Wireshark + Npcap**
+
+* Used for capturing and analyzing packet-level traffic
+* Npcap enables monitor mode and packet injection support on Windows
+* Helpful in viewing wireless frames, management packets, and encryption details
+
+### **2. Aircrack-ng Suite**
+
+* Used for wireless auditing and testing
+* Includes tools like:
+
+  * `airmon-ng` → enable monitor mode
+  * `airodump-ng` → capture wireless packets
+  * `aireplay-ng` → optional packet injection
+  * `aircrack-ng` → analyze captured packets
+
+---
+
+## 🛠️ Methodology Used
+
+### **1. Set Environment**
+
+Prepared a system with:
+
+* Wireless adapter supporting **monitor mode**
+* Npcap installed for Wireshark packet capture
+* Aircrack-ng suite installed
+
+### **2. Enable Monitor Mode**
+
+Using Aircrack-ng:
+
+```bash
+airmon-ng start wlan0
+```
+
+This places the wireless interface into monitor mode, enabling raw packet capture.
+
+### **3. Capture Packets**
+
+Used:
+
+* **airodump-ng** to capture wireless frames
+* **Wireshark** to visually analyze captured packets
+
+Command:
+
+```bash
+airodump-ng wlan0mon
+```
+
+### **4. Open Wireshark**
+
+Selected monitoring interface (e.g., `wlan0mon`) to observe:
+
+* Beacon frames
+* Probe requests & responses
+* Authentication frames
+* Encrypted data frames
+
+### **5. Apply Filters**
+
+Example filters in Wireshark:
+
+```
+wlan
+wlan.addr == <target-mac>
+eapol
+```
+
+### **6. Analyze Captured Traffic**
+
+Observed packet types, security protocols (WPA2/WPA3), and signal properties.
+
+---
+
+## 🔍 Analysis
+
+### **1. Wireless Management Frames**
+
+Wireshark showed:
+
+* Beacon packets broadcasting SSID
+* Probe requests from devices searching for networks
+* Probe responses from nearby access points
+
+This helps understand how Wi-Fi devices discover and join networks.
+
+### **2. EAPOL Handshake Packets (If WPA/WPA2 Traffic Observed)**
+
+Captured **4-way handshake** packets used in WPA/WPA2 authentication:
+
+* These packets are essential for understanding secure Wi-Fi negotiation
+* Aircrack-ng tools rely on this handshake to analyze Wi-Fi security
+
+### **3. Encrypted Data Frames**
+
+Majority of packets appeared as:
+
+```
+802.11 Data — Protected
+```
+
+This indicates that:
+
+* Payload is encrypted
+* Network uses WPA/WPA2/WPA3 security
+
+Only metadata (MAC addresses, frame type, channel) is visible.
+
+### **4. Usefulness of Wireshark + Aircrack-ng Together**
+
+* Aircrack-ng enables raw capture in monitor mode
+* Wireshark provides deep visualization and packet interpretation
+  Together, they offer a powerful environment for wireless traffic analysis.
+
+---
+
+## 📝 Conclusion
+
+This experiment demonstrates how **Wireshark**, **Npcap**, and **Aircrack-ng** can be used together for effective wireless network analysis.
+
+Key conclusions:
+
+* Monitor mode allows capturing raw Wi-Fi frames not normally visible.
+* Wireshark clearly displays management, control, and encrypted data frames.
+* Encrypted payloads confirm that modern Wi-Fi security (WPA/WPA2/WPA3) protects user data.
+* The experiment helps understand how wireless communication works at the packet level and why encryption is essential for securing Wi-Fi networks.
+
+This forms an important foundation for learning wireless security, penetration testing, and network forensics.
+
+---
+
+If you want, I can also create:
+✔ A **combined multi-experiment README**
+✔ A GitHub-ready folder structure
+✔ A version with screenshots included
