@@ -1,0 +1,146 @@
+# IPSec Tunnel Mode — Configuration & Analysis
+
+> A step-by-step README to configure IPSec in **tunnel mode** between two Linux hosts (strongSwan/IKEv2), verify connectivity, capture and analyze traffic, and troubleshoot common issues. Use this as a lab guide or GitHub README.
+
+---
+
+## Table of contents
+
+1. Overview
+2. Lab topology
+3. Prerequisites
+4. File and OS setup (VMs)
+5. strongSwan (IKEv2) configuration — example
+6. Testing connectivity
+7. Packet capture & analysis (tcpdump / Wireshark)
+8. Verifying IPSec state and logs
+9. Common troubleshooting
+10. Security considerations
+11. Automation and scripts
+12. References
+
+---
+
+## 1. Overview
+
+This guide configures an IPSec tunnel (site-to-site) using **strongSwan** on two Linux machines. The tunnel is configured in **tunnel mode** so that the inner IP packets are encapsulated by ESP and routed between two security gateways.
+
+We demonstrate:
+
+* IKEv2 with a pre-shared key (PSK) example.
+* `esp` protection of IP traffic (encryption + integrity).
+* How to verify SAs, routes, and capture encrypted and decrypted packets for analysis.
+
+> Note: Replace addresses, interface names, and shared secrets with ones appropriate for your lab.
+
+---
+
+## 2. Lab topology
+
+```
++----------------+                +----------------+
+|  Host A (gwA)  |  <---IPSec----> |  Host B (gwB)  |
+| 10.0.1.1/24    |   Tunnel: 192.168.100.0/24   | 10.0.2.1/24    |
++----------------+                +----------------+
+
+Inside networks:
+- LAN-A: 10.10.1.0/24 behind Host A
+- LAN-B: 10.10.2.0/24 behind Host B
+
+Traffic between 10.10.1.0/24 and 10.10.2.0/24 must traverse the IPSec tunnel.
+```
+
+---
+
+## 3. Prerequisites
+
+* Two Linux VMs (Ubuntu 20.04+ or similar) or actual routers acting as gateways.
+* `root` or `sudo` access.
+* `strongswan` package (IKEv2 capable)
+* `tcpdump` and `wireshark` (or tshark)
+* `iproute2` utilities (`ip`, `ss`, `ip xfrm`)
+* Optional: `iperf3` for throughput testing
+
+Install required packages on both hosts:
+
+```bash
+sudo apt update
+sudo apt install -y strongswan strongswan-pki libcharon-standard-plugins tcpdump iproute2 iptables iputils-ping iperf3
+```
+
+---
+
+## 4. File and OS setup
+
+Enable forwarding on both gateways:
+
+```bash
+sudo sysctl -w net.ipv4.ip_forward=1
+# make persistent
+sudo tee /etc/sysctl.d/99-ipforward.conf <<EOF
+net.ipv4.ip_forward=1
+EOF
+```
+
+Set iptables / nftables rules to allow IKE/ESP:
+
+```bash
+# Allow IKE (UDP 500) and NAT-T (UDP 4500) and ESP
+sudo iptables -A INPUT -p udp --dport 500 -j ACCEPT
+sudo iptables -A INPUT -p udp --dport 4500 -j ACCEPT
+# Allow ESP
+sudo iptables -A INPUT -p 50 -j ACCEPT
+```
+
+> If either gateway is behind NAT, NAT-T will translate ESP into UDP 4500.
+
+---
+
+## 5. strongSwan (IKEv2) configuration — example
+
+Paths used (Ubuntu):
+
+* `/etc/ipsec.conf` — connection definitions
+* `/etc/ipsec.secrets` — shared secrets
+
+### Host A (`/etc/ipsec.conf`)
+
+```conf
+config setup
+    charondebug="ike 2, knl 2, cfg 2, net 2"
+
+conn %default
+    keyexchange=ikev2
+    ike=aes256-sha256-modp2048
+    esp=aes256-sha256
+    dpdaction=restart
+    dpddelay=30s
+    rekey=no
+    leftcert=
+
+conn gwA-gwB
+    left=10.0.1.1            # public IP of Host A
+    leftsubnet=10.10.1.0/24  # LAN behind Host A
+    leftid=@gwA
+    right=10.0.2.1           # public IP of Host B
+    rightsubnet=10.10.2.0/24 # LAN behind Host B
+    rightid=@gwB
+    auto=start
+```
+
+### Host B (`/etc/ipsec.conf`)
+
+```conf
+config setup
+    charondebug="ike 2, knl 2, cfg 2, net 2"
+
+conn %default
+    keyexchange=ikev2
+    ike=aes256-sha256-modp2048
+    esp=aes256-sha256
+    dpdaction=restart
+    dpddelay=30s
+    rekey=no
+
+conn gwA
+```
