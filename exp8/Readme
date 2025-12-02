@@ -1,0 +1,142 @@
+# EXP 8 — PGP Secure Email (Encryption, Signing & Verification)
+
+A complete GitHub-style README for implementing and analyzing **PGP (Pretty Good Privacy)** for secure email communication using **GnuPG**.
+
+---
+
+## 📌 Overview
+
+This experiment demonstrates:
+
+* Generating PGP key pairs
+* Exporting / importing keys
+* Encrypting email/message using recipient’s public key
+* Decrypting email/message using private key
+* Digitally signing a message
+* Verifying a received signature
+
+PGP ensures **confidentiality, integrity, authentication**, and **non-repudiation**.
+
+---
+
+## 🧪 Lab Requirements
+
+* Linux system (Ubuntu/Pop!_OS/Kali) or Windows with Gpg4win
+* `gpg` (GnuPG) installed
+* Two user accounts / two machines (User A and User B)
+* Text editor (nano/vim)
+
+Check if GPG exists:
+
+```bash
+gpg --version
+```
+
+---
+
+## 🧱 Lab Setup
+
+We assume:
+
+* **User A** → Sender
+* **User B** → Receiver
+
+Each user must generate their own public-private key pair.
+
+---
+
+## 🔑 Step 1 — Generate Key Pair
+
+Run on each user system:
+
+```bash
+gpg --full-generate-key
+```
+
+Choose:
+
+* Key type: **RSA and RSA**
+* Key size: **2048 or 4096 bits**
+* Validity: **0 (never expires)**
+* Name & Email: Enter your details
+* Passphrase: Set a secure one
+
+List keys:
+
+```bash
+gpg --list-keys
+```
+
+---
+
+## 📤 Step 2 — Export Public Key
+
+### User A exports public key:
+
+```bash
+gpg --export -a "User A" > userA_pubkey.asc
+```
+
+Share `userA_pubkey.asc` with User B.
+
+### User B exports public key:
+
+```bash
+gpg --export -a "User B" > userB_pubkey.asc
+```
+
+Share `userB_pubkey.asc` with User A.
+
+---
+
+## 📥 Step 3 — Import Recipient’s Public Key
+
+### On User A:
+
+```bash
+gpg --import userB_pubkey.asc
+```
+
+### On User B:
+
+```bash
+gpg --import userA_pubkey.asc
+```
+
+Verify imported keys:
+
+```bash
+gpg --list-keys
+```
+
+---
+
+## 🔐 Step 4 — Encrypt a Message (User A → User B)
+
+Create a message:
+
+```bash
+echo "Hello, this is a secure message." > message.txt
+```
+
+Encrypt with User B’s public key:
+
+```bash
+gpg --output message.txt.gpg --encrypt --recipient "User B" message.txt
+```
+
+This produces an unreadable encrypted file `message.txt.gpg`.
+
+Send this file to User B.
+
+---
+
+## 🔓 Step 5 — Decrypt the Message (User B)
+
+User B decrypts using their private key:
+
+```bash
+gpg --output decrypted.txt --decrypt message.txt.gpg
+```
+
+Resu
